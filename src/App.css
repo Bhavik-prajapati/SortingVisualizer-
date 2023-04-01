@@ -32,6 +32,15 @@ a {
   overflow: hidden;
 }
 
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+  }
+  #textbtn {
+    display: none;
+  }
+}
+
 .bar {
   display: flex;
   justify-content: center;

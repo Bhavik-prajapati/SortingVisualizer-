@@ -62,6 +62,7 @@ function App() {
     resetArray();
   }, []);
 
+  // ----algos
   const resetArray = () => {
     const arr = [];
     for (let i = 0; i < 50; i++) {
@@ -89,6 +90,147 @@ function App() {
       }
     } while (swapped);
   }
+
+  async function selectionSort() {
+    const len = arr.length;
+    for (let i = 0; i < len; i++) {
+      let minIdx = i;
+      for (let j = i + 1; j < len; j++) {
+        if (arr[j] < arr[minIdx]) {
+          minIdx = j;
+        }
+      }
+      if (minIdx !== i) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        let temp = arr[i];
+        arr[i] = arr[minIdx];
+        arr[minIdx] = temp;
+        setArr([...arr]);
+      }
+    }
+  }
+
+  // Sort the array using insertion sort and update state after each swap
+  async function insertionSort() {
+    const len = arr.length;
+    for (let i = 1; i < len; i++) {
+      let key = arr[i];
+      let j = i - 1;
+      while (j >= 0 && arr[j] > key) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        arr[j + 1] = arr[j];
+        j = j - 1;
+        setArr([...arr]);
+      }
+      arr[j + 1] = key;
+      setArr([...arr]);
+    }
+  }
+
+  // Sort the array using merge sort and update state after each merge
+  async function mergeSort() {
+    const merge = async (arr, l, m, r) => {
+      const n1 = m - l + 1;
+      const n2 = r - m;
+
+      const L = new Array(n1);
+      const R = new Array(n2);
+
+      for (let i = 0; i < n1; i++) {
+        L[i] = arr[l + i];
+      }
+      for (let j = 0; j < n2; j++) {
+        R[j] = arr[m + 1 + j];
+      }
+
+      let i = 0;
+      let j = 0;
+      let k = l;
+
+      while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          arr[k] = L[i];
+          i++;
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          arr[k] = R[j];
+          j++;
+        }
+        setArr([...arr]);
+        k++;
+      }
+
+      while (i < n1) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        arr[k] = L[i];
+        setArr([...arr]);
+        i++;
+        k++;
+      }
+
+      while (j < n2) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        arr[k] = R[j];
+        setArr([...arr]);
+        j++;
+        k++;
+      }
+    };
+
+    const mergeSortHelper = async (arr, l, r) => {
+      if (l < r) {
+        const m = Math.floor((l + r) / 2);
+        await mergeSortHelper(arr, l, m);
+        await mergeSortHelper(arr, m + 1, r);
+        await merge(arr, l, m, r);
+      }
+    };
+
+    await mergeSortHelper(arr, 0, arr.length - 1);
+  }
+
+  async function quickSort() {
+    const partition = async (start, end) => {
+      const pivotIndex = Math.floor((start + end) / 2);
+      const pivotValue = arr[pivotIndex];
+      let i = start;
+      let j = end;
+
+      while (i <= j) {
+        while (arr[i] < pivotValue) {
+          i++;
+        }
+        while (arr[j] > pivotValue) {
+          j--;
+        }
+
+        if (i <= j) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          let temp = arr[i];
+          arr[i] = arr[j];
+          arr[j] = temp;
+          setArr([...arr]);
+          i++;
+          j--;
+        }
+      }
+
+      return i;
+    };
+
+    const sort = async (start, end) => {
+      if (start < end) {
+        const index = await partition(start, end);
+        await sort(start, index - 1);
+        await sort(index, end);
+      }
+    };
+
+    await sort(0, arr.length - 1);
+  }
+
+  //---------algos
 
   return (
     <div className="container">
@@ -130,6 +272,18 @@ function App() {
         </button>
         <button style={btnstyle} onClick={bubbleSort} id="bubblesort">
           BubbleSort
+        </button>
+        <button style={btnstyle} onClick={selectionSort} id="selectionSort">
+          selectionSort
+        </button>
+        <button style={btnstyle} onClick={quickSort} id="quickSort">
+          quickSort
+        </button>
+        <button style={btnstyle} onClick={insertionSort} id="insertionSort">
+          insertionSort
+        </button>
+        <button style={btnstyle} onClick={mergeSort} id="mergeSort">
+          mergeSort
         </button>
       </div>
 
