@@ -234,6 +234,8 @@ function App() {
 
   return (
     <div className="container">
+      <h1 style={{ textTransform: "uppercase" }}>sorting visualizer</h1>
+
       <div className="array">
         {arr.map((value, idx) => (
           <div
