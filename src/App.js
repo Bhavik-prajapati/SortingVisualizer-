@@ -6,6 +6,8 @@ function App() {
   const [speed, setSpeed] = useState(50);
   const [isvisible, isVisible] = useState(true);
 
+  const [highlighted, setHighlighted] = useState([]);
+
   // -----------range-------------
 
   const handleSliderChange = (event) => {
@@ -17,7 +19,7 @@ function App() {
 
   // -----------theme-------------
 
-  const [color, setColor] = useState("#000000"); // default color is black
+  const [color, setColor] = useState("#402626"); // default color is black
 
   const handleColorChange = (event) => {
     setColor(event.target.value);
@@ -75,18 +77,32 @@ function App() {
     console.log("bubble speed " + speed);
     const len = arr.length;
     let swapped;
+
     do {
       swapped = false;
+      let i = 0;
 
-      for (let i = 0; i < len - 1; i++) {
-        if (arr[i] > arr[i + 1]) {
+      while (i < len - 1) {
+        let j = i + 1;
+        let bar1 = document.getElementById(`bar${i}`);
+        let bar2 = document.getElementById(`bar${j}`);
+
+        bar1.style.backgroundColor = "red";
+        bar2.style.backgroundColor = "red";
+
+        if (arr[i] > arr[j]) {
           await new Promise((resolve) => setTimeout(resolve, speed));
           let temp = arr[i];
-          arr[i] = arr[i + 1];
-          arr[i + 1] = temp;
+          arr[i] = arr[j];
+          arr[j] = temp;
           setArr([...arr]);
           swapped = true;
         }
+
+        bar1.style.backgroundColor = "#0077FF";
+        bar2.style.backgroundColor = "#0077FF";
+
+        i++;
       }
     } while (swapped);
   }
@@ -101,94 +117,58 @@ function App() {
         }
       }
       if (minIdx !== i) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, speed));
         let temp = arr[i];
         arr[i] = arr[minIdx];
         arr[minIdx] = temp;
         setArr([...arr]);
+        highlightBars(i, minIdx);
       }
     }
   }
 
-  // Sort the array using insertion sort and update state after each swap
-  async function insertionSort() {
-    const len = arr.length;
-    for (let i = 1; i < len; i++) {
-      let key = arr[i];
-      let j = i - 1;
-      while (j >= 0 && arr[j] > key) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        arr[j + 1] = arr[j];
-        j = j - 1;
-        setArr([...arr]);
-      }
-      arr[j + 1] = key;
-      setArr([...arr]);
-    }
+  function highlightBars(bar1, bar2) {
+    const bars = document.querySelectorAll(".bar");
+    bars[bar1].style.backgroundColor = "yellow";
+    bars[bar2].style.backgroundColor = "yellow";
+    setTimeout(() => {
+      bars[bar1].style.backgroundColor = "#6b5b95";
+      bars[bar2].style.backgroundColor = "#6b5b95";
+    }, speed);
   }
 
-  // Sort the array using merge sort and update state after each merge
-  async function mergeSort() {
-    const merge = async (arr, l, m, r) => {
-      const n1 = m - l + 1;
-      const n2 = r - m;
-
-      const L = new Array(n1);
-      const R = new Array(n2);
-
-      for (let i = 0; i < n1; i++) {
-        L[i] = arr[l + i];
-      }
-      for (let j = 0; j < n2; j++) {
-        R[j] = arr[m + 1 + j];
-      }
-
-      let i = 0;
-      let j = 0;
-      let k = l;
-
-      while (i < n1 && j < n2) {
-        if (L[i] <= R[j]) {
-          await new Promise((resolve) => setTimeout(resolve, 50));
-          arr[k] = L[i];
-          i++;
-        } else {
-          await new Promise((resolve) => setTimeout(resolve, 50));
-          arr[k] = R[j];
-          j++;
-        }
-        setArr([...arr]);
-        k++;
-      }
-
-      while (i < n1) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        arr[k] = L[i];
-        setArr([...arr]);
+  async function partition(low, high) {
+    const pivot = arr[high];
+    let i = low - 1;
+    for (let j = low; j < high; j++) {
+      if (arr[j] < pivot) {
         i++;
-        k++;
-      }
-
-      while (j < n2) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        arr[k] = R[j];
+        await new Promise((resolve) => setTimeout(resolve, speed));
+        const temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
         setArr([...arr]);
-        j++;
-        k++;
+        highlightBars([i, j]);
       }
-    };
-
-    const mergeSortHelper = async (arr, l, r) => {
-      if (l < r) {
-        const m = Math.floor((l + r) / 2);
-        await mergeSortHelper(arr, l, m);
-        await mergeSortHelper(arr, m + 1, r);
-        await merge(arr, l, m, r);
-      }
-    };
-
-    await mergeSortHelper(arr, 0, arr.length - 1);
+    }
+    await new Promise((resolve) => setTimeout(resolve, speed));
+    const temp = arr[i + 1];
+    arr[i + 1] = arr[high];
+    arr[high] = temp;
+    setArr([...arr]);
+    highlightBars([i + 1, high]);
+    return i + 1;
   }
+
+  const highlightBar = (index) => {
+    const bars = document.getElementsByClassName("bar");
+    bars[index].style.backgroundColor = "yellow";
+  };
+
+  const unhighlightBar = (index) => {
+    const bars = document.getElementsByClassName("bar");
+    bars[index].style.backgroundColor = "0077FF";
+  };
 
   async function quickSort() {
     const partition = async (start, end) => {
@@ -206,11 +186,20 @@ function App() {
         }
 
         if (i <= j) {
-          await new Promise((resolve) => setTimeout(resolve, 50));
+          // highlight bars being swapped
+          highlightBar(i);
+          highlightBar(j);
+
+          await new Promise((resolve) => setTimeout(resolve, speed));
           let temp = arr[i];
           arr[i] = arr[j];
           arr[j] = temp;
           setArr([...arr]);
+
+          // unhighlight bars after swap
+          unhighlightBar(i);
+          unhighlightBar(j);
+
           i++;
           j--;
         }
@@ -230,6 +219,111 @@ function App() {
     await sort(0, arr.length - 1);
   }
 
+  async function mergeSort() {
+    const merge = async (arr, l, m, r) => {
+      const n1 = m - l + 1;
+      const n2 = r - m;
+
+      let bar1 = document.getElementById(`bar${n1}`);
+      let bar2 = document.getElementById(`bar${n2}`);
+
+      bar1.style.backgroundColor = "red";
+      bar2.style.backgroundColor = "red";
+
+      const L = new Array(n1);
+      const R = new Array(n2);
+
+      for (let i = 0; i < n1; i++) {
+        L[i] = arr[l + i];
+      }
+      for (let j = 0; j < n2; j++) {
+        R[j] = arr[m + 1 + j];
+      }
+
+      let i = 0;
+      let j = 0;
+      let k = l;
+
+      while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+          await new Promise((resolve) => setTimeout(resolve, speed));
+          arr[k] = L[i];
+          i++;
+          bar1.style.backgroundColor = "#0077FF";
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, speed));
+          arr[k] = R[j];
+          j++;
+          bar2.style.backgroundColor = "#0077FF";
+        }
+        setArr([...arr]);
+        k++;
+      }
+
+      while (i < n1) {
+        await new Promise((resolve) => setTimeout(resolve, speed));
+        arr[k] = L[i];
+        setArr([...arr]);
+        i++;
+        k++;
+        bar1.style.backgroundColor = "red";
+      }
+
+      while (j < n2) {
+        await new Promise((resolve) => setTimeout(resolve, speed));
+        arr[k] = R[j];
+        setArr([...arr]);
+        j++;
+        k++;
+        bar2.style.backgroundColor = "red";
+      }
+
+      bar1.style.backgroundColor = "#0077FF";
+      bar2.style.backgroundColor = "#0077FF";
+    };
+
+    const mergeSortHelper = async (arr, l, r) => {
+      if (l < r) {
+        const m = Math.floor((l + r) / 2);
+        await mergeSortHelper(arr, l, m);
+        await mergeSortHelper(arr, m + 1, r);
+        await merge(arr, l, m, r);
+      }
+    };
+
+    const len = arr.length;
+    const start = 0;
+    const end = len - 1;
+
+    const bar1 = document.getElementById(`bar${start}`);
+    const bar2 = document.getElementById(`bar${end}`);
+    bar1.style.backgroundColor = "red";
+    bar2.style.backgroundColor = "red";
+
+    await mergeSortHelper(arr, start, end);
+
+    bar1.style.backgroundColor = "#0077FF";
+    bar2.style.backgroundColor = "#0077FF";
+  }
+
+  async function insertionSort() {
+    const len = arr.length;
+    for (let i = 1; i < len; i++) {
+      let current = arr[i];
+      let j = i - 1;
+      while (j >= 0 && arr[j] > current) {
+        await new Promise((resolve) => setTimeout(resolve, speed));
+        arr[j + 1] = arr[j];
+        setArr([...arr]);
+        document.getElementById(`bar${j + 1}`).style.backgroundColor = "red";
+        j--;
+      }
+      arr[j + 1] = current;
+      setArr([...arr]);
+      document.getElementById(`bar${j + 1}`).style.backgroundColor = "#0077FF";
+    }
+  }
+
   //---------algos
 
   return (
@@ -239,8 +333,9 @@ function App() {
       <div className="array">
         {arr.map((value, idx) => (
           <div
-            className="bar"
+            className={`bar ${highlighted.includes(idx) ? "highlighted" : ""}`}
             key={idx}
+            id={`bar${idx}`}
             style={{
               ...barStyle,
               height: `${value}px`,
