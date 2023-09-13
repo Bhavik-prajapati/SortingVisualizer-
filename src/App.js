@@ -6,6 +6,8 @@ function App() {
   const [speed, setSpeed] = useState(50);
   const [isvisible, isVisible] = useState(true);
 
+  const [disabledButton, setDisabledButton] = useState(null);
+
   const [highlighted, setHighlighted] = useState([]);
 
   // -----------range-------------
